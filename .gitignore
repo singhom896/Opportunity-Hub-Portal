@@ -13,7 +13,7 @@ out/
 
 # Database dumps / backups (contain user data and password hashes)
 backend/storage/app/backups/
-*.sql
+#*.sql
 *.sqlite
 
 # Logs, caches, editor and OS files
