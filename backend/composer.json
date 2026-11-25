@@ -42,12 +42,7 @@
         },
         "files": [
 			"app/Helpers/CommonHelper.php",
-			"app/Helpers/MasterHelper.php",
-			"app/Helpers/MenuHelper.php",
-			"app/Helpers/SidebarHelper.php",
-			"app/Helpers/UrlHelper.php",
 			"app/Helpers/helpers.php"
-					
         ]
     },
     "autoload-dev": {

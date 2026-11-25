@@ -4,16 +4,15 @@ namespace App\Http\Controllers\Api\V1\Console;
 
 use App\Http\Controllers\Api\Concerns\ApiResponse;
 use App\Http\Controllers\Api\Concerns\ConsoleScope;
-use App\Http\Controllers\Backend\ArtistRegistrationBackendController;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
  * Artist Management -> Artist Registration, as JSON.
  *
- * Extends the Blade controller so validation, registration-number generation,
- * uploads, awards, portfolio links, status history and the set-password email
- * stay in ONE place (persistRegistration, artistList, previewData, ...).
+ * Validation, registration-number generation, uploads, awards, portfolio
+ * links, status history and the set-password email live in
+ * ArtistRegistrationBase (persistRegistration, artistList, previewData, ...).
  *
  *   GET   /artists                    ?search=&registration_status=&registration_type=&page=
  *   GET   /artists/form-options       ?id=  (dropdowns + existing data for the form)
@@ -22,7 +21,7 @@ use Illuminate\Http\Request;
  *   POST  /artists/{id}               update (multipart)
  *   PATCH /artists/{id}/status        { status: approved|rejected, remarks }
  */
-class ArtistRegistrationController extends ArtistRegistrationBackendController
+class ArtistRegistrationController extends ArtistRegistrationBase
 {
     use ApiResponse, ConsoleScope;
 

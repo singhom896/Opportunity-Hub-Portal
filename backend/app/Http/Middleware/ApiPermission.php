@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * API twin of PermissionMiddleware (`checkPermission`) for routes/api.php.
+ * Module permission check for routes/api.php.
  *
  * The web middleware derives the module from the URL; API URLs differ from the
  * page URLs, so the module's `page_url` is passed explicitly:

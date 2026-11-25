@@ -29,7 +29,7 @@ class ConsoleController extends Controller
     use ApiResponse, ConsoleScope;
 
     /**
-     * Same tree as getSidebar() in app/Helpers/helpers.php: active top-level
+     * Sidebar tree for the Next.js console: active top-level
      * modules the role can view, with their viewable children. Also returns a
      * flat page_url -> permissions map the frontend uses to show/hide buttons.
      */

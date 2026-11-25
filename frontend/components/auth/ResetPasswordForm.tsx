@@ -1,8 +1,13 @@
 "use client";
 
-// Step 2 of Forgot Password: the link from the email opens
-// /reset-password?token=...&email=... ; the user sets a new password.
+// mode "reset" (default) - step 2 of Forgot Password: the link from the email
+// opens /reset-password?token=...&email=... ; the user sets a new password.
 // API: POST /api/auth/reset-password/check and /api/auth/reset-password.
+//
+// mode "setup" - /set-password?token=... from the "Set your password" email
+// sent when an administrator creates or imports an account. The check call
+// returns the account's email. API: POST /api/auth/password-setup/check and
+// /api/auth/password-setup.
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
@@ -28,13 +33,15 @@ function validate(p: string, c: string): Errors {
   return e;
 }
 
-export default function ResetPasswordForm() {
+export default function ResetPasswordForm({ mode = "reset" }: { mode?: "reset" | "setup" }) {
+  const setup = mode === "setup";
   const params = useSearchParams();
   const token = params.get("token") ?? "";
-  const email = params.get("email") ?? "";
+  const [email, setEmail] = useState(setup ? "" : params.get("email") ?? "");
+  const hasLink = setup ? !!token : !!(token && email);
 
-  const [linkState, setLinkState] = useState<"checking" | "valid" | "invalid">(token && email ? "checking" : "invalid");
-  const [linkMessage, setLinkMessage] = useState("This password reset link is incomplete. Please use the link from your email.");
+  const [linkState, setLinkState] = useState<"checking" | "valid" | "invalid">(hasLink ? "checking" : "invalid");
+  const [linkMessage, setLinkMessage] = useState(`This password ${setup ? "setup" : "reset"} link is incomplete. Please use the link from your email.`);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [show, setShow] = useState(false);
@@ -46,17 +53,22 @@ export default function ResetPasswordForm() {
 
   // Check the link once, so an expired / used link is reported before typing.
   useEffect(() => {
-    if (!token || !email) return;
+    if (!hasLink) return;
     let alive = true;
-    api.post("/auth/reset-password/check", { email, token })
+    const check = setup
+      ? api.post<{ email: string }>("/auth/password-setup/check", { token }).then((res) => alive && setEmail(res.data.email))
+      : api.post("/auth/reset-password/check", { email, token });
+    check
       .then(() => alive && setLinkState("valid"))
       .catch((err) => {
         if (!alive) return;
-        setLinkMessage(err instanceof ApiError ? err.message : "This password reset link could not be checked. Please try again.");
+        setLinkMessage(err instanceof ApiError ? err.message : "This link could not be checked. Please try again.");
         setLinkState("invalid");
       });
     return () => { alive = false; };
-  }, [token, email]);
+    // email is fixed for "reset" and filled by the check for "setup".
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, hasLink, setup]);
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -70,11 +82,13 @@ export default function ResetPasswordForm() {
     }
     setBusy(true);
     try {
-      const res = await api.post("/auth/reset-password", { email, token, password, password_confirmation: confirm });
+      const res = setup
+        ? await api.post("/auth/password-setup", { token, password, password_confirmation: confirm })
+        : await api.post("/auth/reset-password", { email, token, password, password_confirmation: confirm });
       setDone(res.message);
     } catch (err) {
       if (err instanceof ApiError) {
-        if (err.code === "invalid_reset_link") {
+        if (err.code === "invalid_reset_link" || err.code === "invalid_setup_link") {
           setLinkMessage(err.message);
           setLinkState("invalid");
         } else {
@@ -93,7 +107,7 @@ export default function ResetPasswordForm() {
     return (
       <div className="auth-done" role="status">
         <div className="auth-done-icon ok" aria-hidden="true"><i className="bi bi-shield-check" /></div>
-        <h3>Password changed</h3>
+        <h3>{setup ? "Account activated" : "Password changed"}</h3>
         <p>{done}</p>
         <div className="auth-done-actions">
           <Link className="submit as-link" href="/login?reset=1">Go to Login</Link>
@@ -103,7 +117,7 @@ export default function ResetPasswordForm() {
   }
 
   if (linkState === "checking") {
-    return <p className="muted" role="status"><span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />Checking your reset link…</p>;
+    return <p className="muted" role="status"><span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />Checking your link…</p>;
   }
 
   if (linkState === "invalid") {
@@ -176,7 +190,7 @@ export default function ResetPasswordForm() {
         </div>
         <div className="field">
           <button className="submit" type="submit" disabled={busy} aria-busy={busy}>
-            {busy ? "Saving…" : "Reset Password"}
+            {busy ? "Saving…" : setup ? "Set Password" : "Reset Password"}
           </button>
         </div>
       </form>

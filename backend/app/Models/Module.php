@@ -19,43 +19,5 @@ class Module extends Model
     {
         return $this->belongsTo(User::class,'created_by','id');
     }
-   /*  public function isActive(): bool
-    {
-        if (url()->current() === url($this->page_url)) {
-            return true;
-        }
-        foreach ($this->children as $child) {
-            if ($child->isActive()) {
-                return true;
-            }
-        }
-
-        return false;
-    } */
-	
-	public function isActive(): bool
-	{
-		$currentPath = trim(request()->path(), '/');
-
-		$prefix = trim(config('app.backend_prefix'), '/');
-
-		if ($prefix && str_starts_with($currentPath, $prefix . '/')) {
-			$currentPath = substr($currentPath, strlen($prefix) + 1);
-		}
-
-		$modulePath = trim($this->page_url, '/');
-
-		if ($modulePath === $currentPath || str_starts_with($currentPath, $modulePath . '/')) {
-			return true;
-		}
-
-		foreach ($this->children as $child) {
-			if ($child->isActive()) {
-				return true;
-			}
-		}
-
-		return false;
-	}
 	
 }

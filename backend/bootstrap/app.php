@@ -7,8 +7,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Console\Scheduling\Schedule;
 
 
-use App\Http\Middleware\AdminMiddleware;
-use App\Http\Middleware\PermissionMiddleware;
 use App\Http\Middleware\JwtAuthenticate;
 use App\Http\Middleware\ApiPermission;
 use App\Http\Controllers\Api\Concerns\ApiResponse;
@@ -29,8 +27,6 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'auth' => AdminMiddleware::class,
-            'checkPermission' => PermissionMiddleware::class,
             // Stateless JWT auth for the REST API (routes/api.php).
             'jwt' => JwtAuthenticate::class,
             // Module permission check for API routes (after `jwt`).

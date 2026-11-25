@@ -18,8 +18,7 @@ use Tymon\JWTAuth\Exceptions\TokenExpiredException;
  *   token_expired                                  -> try /auth/refresh
  *   account_blocked (403)                          -> log out with message
  *
- * Registered as the `jwt` alias in bootstrap/app.php. (The `auth` alias is
- * taken by the legacy session-based AdminMiddleware.)
+ * Registered as the `jwt` alias in bootstrap/app.php.
  */
 class JwtAuthenticate
 {

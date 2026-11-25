@@ -23,7 +23,8 @@ class SetArtistPasswordMail extends Mailable
     {
         return new Content(
             view: 'emails.password-setup',
-            with: ['token' => $this->token]
+            // Next.js page /set-password (Api\V1\PasswordSetupController)
+            with: ['url' => rtrim((string) config('app.frontend_url'), '/').'/set-password?token='.urlencode($this->token)]
         );
     }
 }

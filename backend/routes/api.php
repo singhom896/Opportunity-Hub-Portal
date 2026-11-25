@@ -73,6 +73,10 @@ Route::prefix('v1')->group(function () {
         });
         Route::post('reset-password/check', [\App\Http\Controllers\Api\V1\PasswordResetController::class, 'check'])->middleware('throttle:30,1');
 
+        // First password for admin-created / imported accounts (Next.js /set-password)
+        Route::post('password-setup/check', [\App\Http\Controllers\Api\V1\PasswordSetupController::class, 'check'])->middleware('throttle:30,1');
+        Route::post('password-setup', [\App\Http\Controllers\Api\V1\PasswordSetupController::class, 'store'])->middleware('throttle:10,1');
+
         // Accepts an expired token (inside the refresh window), so no `jwt` middleware.
         Route::post('refresh', [AuthController::class, 'refresh'])->middleware('throttle:30,1');
 
